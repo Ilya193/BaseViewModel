@@ -10,7 +10,7 @@ class MainViewModel : BaseViewModel<MainViewModel.Model>() {
 
     private val uiState = MutableStateFlow(Model())
 
-    val action = MutableSharedFlow<Action>(replay = 1)
+    val action = MutableSharedFlow<Action>()
 
     init {
         viewModelScope.launch {
@@ -22,6 +22,7 @@ class MainViewModel : BaseViewModel<MainViewModel.Model>() {
         viewModelScope.launch {
             when (event) {
                 is Event.OnClick -> handleEvent(event)
+                is Event.Recover -> handleEvent(event)
             }
         }
     }
@@ -39,6 +40,14 @@ class MainViewModel : BaseViewModel<MainViewModel.Model>() {
 
         val newState = oldState.copy(items = newItems, selectedItem = event.position)
         diff(oldState, newState)
+    }
+
+    private suspend fun handleEvent(event: Event.Recover) {
+        val state = uiState.value
+        action.emit(Action.OnSelectItem(items = state.items))
+        if (state.selectedItem >= 0) {
+            action.emit(Action.UpdateText(text = state.items[state.selectedItem].text))
+        }
     }
 
     override suspend fun diff(old: Model, new: Model) {
@@ -73,6 +82,8 @@ class MainViewModel : BaseViewModel<MainViewModel.Model>() {
         class OnClick(
             val position: Int
         ) : Event
+
+        class Recover : Event
     }
 
     sealed interface Action {

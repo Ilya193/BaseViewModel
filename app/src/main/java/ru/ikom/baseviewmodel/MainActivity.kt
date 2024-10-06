@@ -38,11 +38,15 @@ class MainActivity : AppCompatActivity() {
 
         settingViewModel()
         setupViews()
+
+        savedInstanceState?.let {
+            viewModel.handleEvent(MainViewModel.Event.Recover())
+        }
     }
 
     private fun settingViewModel() {
         lifecycleScope.launch {
-            viewModel.action.flowWithLifecycle(lifecycle).collect {
+            viewModel.action.collect {
                 receiveAction(it)
             }
         }
