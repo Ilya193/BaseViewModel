@@ -45,9 +45,8 @@ class MainViewModel : BaseViewModel<MainViewModel.Model>() {
     private suspend fun handleEvent(event: Event.Recover) {
         val state = uiState.value
         action.emit(Action.OnSelectItem(items = state.items))
-        if (state.selectedItem >= 0) {
-            action.emit(Action.UpdateText(text = state.items[state.selectedItem].text))
-        }
+        if (state.selectedItem < 0) return
+        action.emit(Action.UpdateText(text = state.items[state.selectedItem].text))
     }
 
     override suspend fun diff(old: Model, new: Model) {
