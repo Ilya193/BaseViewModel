@@ -6,15 +6,13 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.isVisible
-import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
 import ru.ikom.baseviewmodel.databinding.ActivityMainBinding
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), BaseView<MainViewModel.Model> {
 
     private val binding: ActivityMainBinding by lazy(LazyThreadSafetyMode.NONE) {
         ActivityMainBinding.inflate(layoutInflater)
@@ -61,9 +59,27 @@ class MainActivity : AppCompatActivity() {
 
     private fun receiveAction(action: MainViewModel.Action) {
         when (action) {
-            is MainViewModel.Action.Init -> adapter.submitList(action.items)
-            is MainViewModel.Action.OnSelectItem -> adapter.submitList(action.items)
-            is MainViewModel.Action.UpdateText -> binding.textview.text = action.text
+            is MainViewModel.Action.Render -> render(action)
         }
+    }
+
+
+    override val viewRenderer: ViewRenderer<MainViewModel.Model> by lazy(LazyThreadSafetyMode.NONE) {
+        diff {
+            diff(
+                get = MainViewModel.Model::items,
+                compare = { a, b -> a === b },
+                set = adapter::submitList
+            )
+
+            diff(
+                get = MainViewModel.Model::textTitle,
+                set = binding.textview::setText
+            )
+        }
+    }
+
+    private fun render(action: MainViewModel.Action.Render) {
+        viewRenderer.render(action.new)
     }
 }
