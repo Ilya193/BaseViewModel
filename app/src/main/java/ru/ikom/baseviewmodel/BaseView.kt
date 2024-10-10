@@ -2,7 +2,7 @@ package ru.ikom.baseviewmodel
 
 interface BaseView<Model: Any> {
 
-    val viewRenderer: ViewRenderer<Model>
+    var viewRenderer: ViewRenderer<Model>?
 }
 
 fun <Model : Any> diff(block: DiffBuilder<Model>.() -> Unit): ViewRenderer<Model> {

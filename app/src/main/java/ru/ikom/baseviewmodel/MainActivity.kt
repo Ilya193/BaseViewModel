@@ -34,6 +34,19 @@ class MainActivity : AppCompatActivity(), BaseView<MainViewModel.Model> {
             insets
         }
 
+        viewRenderer = diff {
+            diff(
+                get = MainViewModel.Model::items,
+                compare = { a, b -> a === b },
+                set = adapter::submitList
+            )
+
+            diff(
+                get = MainViewModel.Model::textTitle,
+                set = binding.textview::setText
+            )
+        }
+
         settingViewModel()
         setupViews()
 
@@ -64,22 +77,9 @@ class MainActivity : AppCompatActivity(), BaseView<MainViewModel.Model> {
     }
 
 
-    override val viewRenderer: ViewRenderer<MainViewModel.Model> by lazy(LazyThreadSafetyMode.NONE) {
-        diff {
-            diff(
-                get = MainViewModel.Model::items,
-                compare = { a, b -> a === b },
-                set = adapter::submitList
-            )
-
-            diff(
-                get = MainViewModel.Model::textTitle,
-                set = binding.textview::setText
-            )
-        }
-    }
+    override var viewRenderer: ViewRenderer<MainViewModel.Model>? = null
 
     private fun render(action: MainViewModel.Action.Render) {
-        viewRenderer.render(action.new)
+        viewRenderer?.render(action.new)
     }
 }
