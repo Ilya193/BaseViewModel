@@ -3,6 +3,10 @@ package ru.ikom.baseviewmodel
 interface BaseView<Model: Any> {
 
     var viewRenderer: ViewRenderer<Model>?
+
+    fun render(model: Model) { viewRenderer?.render(model) }
+
+    fun release() { viewRenderer = null }
 }
 
 fun <Model : Any> diff(block: DiffBuilder<Model>.() -> Unit): ViewRenderer<Model> {

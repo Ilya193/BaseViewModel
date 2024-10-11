@@ -36,6 +36,8 @@ class MainActivity : AppCompatActivity(), MainView {
 
     private val viewModel: MainViewModel by viewModels()
 
+    override var viewRenderer: ViewRenderer<MainView.Model>? = null
+
     private val adapter = ItemsAdapter {
         viewModel.handleEvent(MainViewModel.Event.OnClick(it))
     }
@@ -88,14 +90,7 @@ class MainActivity : AppCompatActivity(), MainView {
 
     private fun receiveAction(action: MainViewModel.Action) {
         when (action) {
-            is MainViewModel.Action.Render -> render(action)
+            is MainViewModel.Action.Render -> render(action.new)
         }
-    }
-
-
-    override var viewRenderer: ViewRenderer<MainView.Model>? = null
-
-    private fun render(action: MainViewModel.Action.Render) {
-        viewRenderer?.render(action.new)
     }
 }
