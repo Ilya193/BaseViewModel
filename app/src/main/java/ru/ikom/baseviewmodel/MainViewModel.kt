@@ -4,7 +4,8 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 
-class MainViewModel : BaseViewModel<MainViewModel.State>(initialState = State.initial()) {
+class MainViewModel :
+    BaseViewModel<MainViewModel.State, MainViewModel.Msg>(initialState = State.initial()) {
 
     val action = MutableSharedFlow<Action>()
 
@@ -34,20 +35,31 @@ class MainViewModel : BaseViewModel<MainViewModel.State>(initialState = State.in
             else item.copy(isSelected = false)
         }
 
-        val newState = oldState.copy(
+        dispatch(Msg.NewItems(
             items = newItems,
-            selectedItem = event.position,
+            position = event.position,
             textTitle = newItems[event.position].text
-        )
-        action.emit(Action.Render(newState.stateToModel()))
-        uiState = newState
+        ))
     }
 
     private suspend fun handleEvent(event: Event.Recover) {
-        val newState = uiState
-        action.emit(Action.Render(newState.stateToModel()))
+        action.emit(Action.Render(uiState.stateToModel()))
     }
 
+    override suspend fun dispatch(msg: Msg) {
+        uiState = uiState.reduce(msg)
+        action.emit(Action.Render(uiState.stateToModel()))
+    }
+
+    override suspend fun State.reduce(msg: Msg): State =
+        when (msg) {
+            is Msg.NewItems ->
+                copy(
+                    items = msg.items,
+                    selectedItem = msg.position,
+                    textTitle = msg.textTitle
+                )
+        }
 
     data class State(
         val items: List<ItemUi>,
@@ -77,5 +89,13 @@ class MainViewModel : BaseViewModel<MainViewModel.State>(initialState = State.in
         class Render(
             val new: MainView.Model
         ) : Action
+    }
+
+    sealed interface Msg {
+        class NewItems(
+            val items: List<ItemUi>,
+            val position: Int,
+            val textTitle: String,
+        ) : Msg
     }
 }
