@@ -8,8 +8,8 @@ abstract class BaseViewModel<State : Any, Msg : Any>(
 
     protected var uiState = initialState
 
-    abstract suspend fun dispatch(msg: Msg)
+    protected abstract suspend fun dispatch(msg: Msg)
 
-    abstract suspend fun State.reduce(msg: Msg): State
+    protected abstract suspend fun State.reduce(msg: Msg): State
 
 }
