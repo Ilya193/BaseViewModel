@@ -12,7 +12,23 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
 import ru.ikom.baseviewmodel.databinding.ActivityMainBinding
 
-class MainActivity : AppCompatActivity(), BaseView<MainViewModel.Model> {
+interface MainView : BaseView<MainView.Model> {
+
+    data class Model(
+        val items: List<ItemUi>,
+        val textTitle: String
+    )
+}
+
+val stateToModel: MainViewModel.State.() -> MainView.Model =
+    {
+        MainView.Model(
+            items = items,
+            textTitle = textTitle,
+        )
+    }
+
+class MainActivity : AppCompatActivity(), MainView {
 
     private val binding: ActivityMainBinding by lazy(LazyThreadSafetyMode.NONE) {
         ActivityMainBinding.inflate(layoutInflater)
@@ -36,13 +52,13 @@ class MainActivity : AppCompatActivity(), BaseView<MainViewModel.Model> {
 
         viewRenderer = diff {
             diff(
-                get = MainViewModel.Model::items,
+                get = MainView.Model::items,
                 compare = { a, b -> a === b },
                 set = adapter::submitList
             )
 
             diff(
-                get = MainViewModel.Model::textTitle,
+                get = MainView.Model::textTitle,
                 set = binding.textview::setText
             )
         }
@@ -77,7 +93,7 @@ class MainActivity : AppCompatActivity(), BaseView<MainViewModel.Model> {
     }
 
 
-    override var viewRenderer: ViewRenderer<MainViewModel.Model>? = null
+    override var viewRenderer: ViewRenderer<MainView.Model>? = null
 
     private fun render(action: MainViewModel.Action.Render) {
         viewRenderer?.render(action.new)
