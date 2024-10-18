@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.serialization.Serializable
 import ru.ikom.baseviewmodel.databinding.ItemBinding
 
 class ItemsAdapter(
@@ -55,6 +56,7 @@ class ItemsAdapter(
     }
 }
 
+@Serializable
 data class ItemUi(
     val id: Int,
     val text: String,

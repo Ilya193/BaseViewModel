@@ -68,9 +68,7 @@ class MainActivity : AppCompatActivity(), MainView {
         settingViewModel()
         setupViews()
 
-        savedInstanceState?.let {
-            viewModel.handleEvent(MainViewModel.Event.Recover())
-        }
+        viewModel.handleEvent(MainViewModel.Event.OnViewCreated())
     }
 
     private fun settingViewModel() {

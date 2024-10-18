@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    kotlin("plugin.serialization") version "2.0.21"
 }
 
 android {
@@ -51,4 +52,6 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     implementation(libs.androidx.fragment.ktx)
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
 }
