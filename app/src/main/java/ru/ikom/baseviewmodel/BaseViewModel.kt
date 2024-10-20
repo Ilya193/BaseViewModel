@@ -31,7 +31,7 @@ interface Observer<T> {
     fun onNext(value: T)
 }
 
-fun <T> observer(onNext: (T) -> Unit): Observer<T> = object : Observer<T> {
+inline fun <T> observer(crossinline onNext: (T) -> Unit): Observer<T> = object : Observer<T> {
     override fun onNext(value: T) {
         onNext(value)
     }
