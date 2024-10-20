@@ -9,6 +9,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.ikom.baseviewmodel.databinding.ActivityMainBinding
 
@@ -68,16 +70,12 @@ class MainActivity : AppCompatActivity(), MainView {
         settingViewModel()
         setupViews()
 
-        savedInstanceState?.let {
-            viewModel.handleEvent(MainViewModel.Event.Recover())
-        }
+        viewModel.handleEvent(MainViewModel.Event.OnViewCreated())
     }
 
     private fun settingViewModel() {
         lifecycleScope.launch {
-            viewModel.action.collect {
-                receiveAction(it)
-            }
+            viewModel.states.map(stateToModel) bindTo ::render
         }
     }
 
@@ -86,11 +84,5 @@ class MainActivity : AppCompatActivity(), MainView {
         binding.items.itemAnimator = null
         binding.items.setHasFixedSize(true)
         binding.items.addItemDecoration(DividerItemDecoration(this, RecyclerView.VERTICAL))
-    }
-
-    private fun receiveAction(action: MainViewModel.Action) {
-        when (action) {
-            is MainViewModel.Action.Render -> render(action.new)
-        }
     }
 }

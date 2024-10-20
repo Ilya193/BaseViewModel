@@ -51,4 +51,6 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     implementation(libs.androidx.fragment.ktx)
+
+    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.14")
 }

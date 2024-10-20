@@ -7,24 +7,14 @@ import kotlinx.coroutines.launch
 class MainViewModel :
     BaseViewModel<MainViewModel.State, MainViewModel.Msg>(initialState = State.initial()) {
 
-    val action = MutableSharedFlow<Action>()
-
-    init {
-        viewModelScope.launch {
-            action.emit(Action.Render(new = uiState.stateToModel()))
-        }
-    }
-
     fun handleEvent(event: Event) {
-        viewModelScope.launch {
-            when (event) {
-                is Event.OnClick -> handleEvent(event)
-                is Event.Recover -> handleEvent(event)
-            }
+        when (event) {
+            is Event.OnClick -> handleEvent(event)
+            is Event.OnViewCreated -> handleEvent(event)
         }
     }
 
-    private suspend fun handleEvent(event: Event.OnClick) {
+    private fun handleEvent(event: Event.OnClick) {
         val oldState = uiState
         val items = oldState.items
 
@@ -42,16 +32,16 @@ class MainViewModel :
         ))
     }
 
-    private suspend fun handleEvent(event: Event.Recover) {
-        action.emit(Action.Render(uiState.stateToModel()))
+    private fun handleEvent(event: Event.OnViewCreated) {
+        observer?.onNext(uiState)
     }
 
-    override suspend fun dispatch(msg: Msg) {
+    override fun dispatch(msg: Msg) {
         uiState = uiState.reduce(msg)
-        action.emit(Action.Render(uiState.stateToModel()))
+        observer?.onNext(uiState)
     }
 
-    override suspend fun State.reduce(msg: Msg): State =
+    override fun State.reduce(msg: Msg): State =
         when (msg) {
             is Msg.NewItems ->
                 copy(
@@ -81,7 +71,7 @@ class MainViewModel :
             val position: Int
         ) : Event
 
-        class Recover : Event
+        class OnViewCreated : Event
     }
 
     sealed interface Action {

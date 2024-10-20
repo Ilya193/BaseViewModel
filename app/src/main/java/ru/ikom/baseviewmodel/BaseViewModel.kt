@@ -1,6 +1,9 @@
 package ru.ikom.baseviewmodel
 
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 
 abstract class BaseViewModel<State : Any, Msg : Any>(
     private val initialState: State
@@ -8,8 +11,32 @@ abstract class BaseViewModel<State : Any, Msg : Any>(
 
     protected var uiState = initialState
 
-    protected abstract suspend fun dispatch(msg: Msg)
+    protected var observer: Observer<State>? = null
 
-    protected abstract suspend fun State.reduce(msg: Msg): State
+    val states: Flow<State> = callbackFlow {
+        observer = observer { channel.trySend(it) }
+        awaitClose()
+    }
 
+    protected abstract fun dispatch(msg: Msg)
+
+    protected abstract fun State.reduce(msg: Msg): State
+
+}
+
+interface Observer<T> {
+    fun onNext(value: T)
+}
+
+fun <T> observer(onNext: (T) -> Unit): Observer<T> = object : Observer<T> {
+    override fun onNext(value: T) {
+        onNext(value)
+    }
+
+}
+
+suspend inline infix fun <T> Flow<T>.bindTo(crossinline action: (T) -> Unit) {
+    collect {
+        action(it)
+    }
 }
