@@ -36,11 +36,6 @@ class MainViewModel :
         observer?.onNext(uiState)
     }
 
-    override fun dispatch(msg: Msg) {
-        uiState = uiState.reduce(msg)
-        observer?.onNext(uiState)
-    }
-
     override fun State.reduce(msg: Msg): State =
         when (msg) {
             is Msg.NewItems ->
