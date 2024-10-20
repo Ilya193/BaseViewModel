@@ -1,6 +1,8 @@
 package ru.ikom.baseviewmodel
 
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 
@@ -20,16 +22,20 @@ class MainViewModel :
 
         if (items[event.position].isSelected) return
 
-        val newItems = items.mapIndexed { index, item ->
-            if (index == event.position) item.copy(isSelected = true)
-            else item.copy(isSelected = false)
-        }
+        viewModelScope.launch {
+            val newItems = async(Dispatchers.IO) {
+                items.mapIndexed { index, item ->
+                    if (index == event.position) item.copy(isSelected = true)
+                    else item.copy(isSelected = false)
+                }
+            }.await()
 
-        dispatch(Msg.NewItems(
-            items = newItems,
-            position = event.position,
-            textTitle = newItems[event.position].text
-        ))
+            dispatch(Msg.NewItems(
+                items = newItems,
+                position = event.position,
+                textTitle = newItems[event.position].text
+            ))
+        }
     }
 
     private fun handleEvent(event: Event.OnViewCreated) {
