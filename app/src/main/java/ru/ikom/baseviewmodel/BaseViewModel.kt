@@ -15,7 +15,7 @@ abstract class BaseViewModel<State : Any, Msg : Any>(
 
     val states: Flow<State> = callbackFlow {
         observer = observer { channel.trySend(it) }
-        awaitClose()
+        awaitClose { observer = null }
     }
 
     protected abstract fun dispatch(msg: Msg)
