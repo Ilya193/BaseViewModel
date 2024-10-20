@@ -18,7 +18,7 @@ abstract class BaseViewModel<State : Any, Msg : Any>(
         awaitClose { observer = null }
     }
 
-    private fun dispatch(msg: Msg) {
+    protected fun dispatch(msg: Msg) {
         uiState = uiState.reduce(msg)
         observer?.onNext(uiState)
     }
