@@ -5,22 +5,33 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 
-abstract class BaseViewModel<State : Any, Msg : Any>(
+abstract class BaseViewModel<State : Any, Msg : Any, Label: Any>(
     private val initialState: State
 ) : ViewModel() {
 
     protected var uiState = initialState
 
-    protected var observer: Observer<State>? = null
+    protected var observerState: Observer<State>? = null
+
+    protected var observerLabel: Observer<Label>? = null
 
     val states: Flow<State> = callbackFlow {
-        observer = observer { channel.trySend(it) }
-        awaitClose { observer = null }
+        observerState = observer { channel.trySend(it) }
+        awaitClose { observerState = null }
+    }
+
+    val labels: Flow<Label> = callbackFlow {
+        observerLabel = observer { channel.trySend(it) }
+        awaitClose { observerState = null }
     }
 
     protected fun dispatch(msg: Msg) {
         uiState = uiState.reduce(msg)
-        observer?.onNext(uiState)
+        observerState?.onNext(uiState)
+    }
+
+    protected fun publish(label: Label) {
+        observerLabel?.onNext(label)
     }
 
     protected abstract fun State.reduce(msg: Msg): State

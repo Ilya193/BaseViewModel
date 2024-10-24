@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 
 class MainViewModel :
-    BaseViewModel<MainViewModel.State, MainViewModel.Msg>(initialState = State.initial()) {
+    BaseViewModel<MainViewModel.State, MainViewModel.Msg, Nothing>(initialState = State.initial()) {
 
     fun handleEvent(event: Event) {
         when (event) {
@@ -39,7 +39,7 @@ class MainViewModel :
     }
 
     private fun handleEvent(event: Event.OnViewCreated) {
-        observer?.onNext(uiState)
+        observerState?.onNext(uiState)
     }
 
     override fun State.reduce(msg: Msg): State =
