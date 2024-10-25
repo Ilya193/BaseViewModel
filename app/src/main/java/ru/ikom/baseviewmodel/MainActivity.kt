@@ -75,7 +75,9 @@ class MainActivity : AppCompatActivity(), MainView {
 
     private fun settingViewModel() {
         lifecycleScope.launch {
-            viewModel.states.map(stateToModel) bindTo ::render
+            launch {
+                viewModel.states.map(stateToModel) bindTo ::render
+            }
         }
     }
 

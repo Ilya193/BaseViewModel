@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 
 class MainViewModel :
-    BaseViewModel<MainViewModel.State, MainViewModel.Msg, Nothing>(initialState = State.initial()) {
+    BaseViewModel<MainViewModel.State, MainViewModel.Msg, MainViewModel.Label>(initialState = State.initial()) {
 
     fun handleEvent(event: Event) {
         when (event) {
@@ -88,5 +88,9 @@ class MainViewModel :
             val position: Int,
             val textTitle: String,
         ) : Msg
+    }
+
+    sealed interface Label {
+        class Test : Label
     }
 }
