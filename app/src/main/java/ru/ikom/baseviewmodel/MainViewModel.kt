@@ -10,6 +10,7 @@ class MainViewModel :
     BaseViewModel<MainViewModel.State, MainViewModel.Msg, MainViewModel.Label>(initialState = State.initial()) {
 
     fun handleEvent(event: Event) {
+        publish(Label.Test())
         when (event) {
             is Event.OnClick -> handleEvent(event)
             is Event.OnViewCreated -> handleEvent(event)

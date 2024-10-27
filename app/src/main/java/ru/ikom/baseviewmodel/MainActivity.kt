@@ -78,6 +78,18 @@ class MainActivity : AppCompatActivity(), MainView {
             launch {
                 viewModel.states.map(stateToModel) bindTo ::render
             }
+
+            launch {
+                viewModel.labels.collect {
+                    println("s149 first $it")
+                }
+            }
+
+            launch {
+                viewModel.labels.collect {
+                    println("s149 second $it")
+                }
+            }
         }
     }
 

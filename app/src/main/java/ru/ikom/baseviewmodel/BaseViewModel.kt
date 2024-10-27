@@ -13,7 +13,9 @@ abstract class BaseViewModel<State : Any, Msg : Any, Label: Any>(
 
     protected var observerState: Observer<State>? = null
 
-    protected var observerLabel: Observer<Label>? = null
+    //protected var observerLabel: Observer<Label>? = null
+
+    protected val observerLabels = mutableListOf<Observer<Label>>()
 
     val states: Flow<State> = callbackFlow {
         observerState = observer { channel.trySend(it) }
@@ -21,8 +23,9 @@ abstract class BaseViewModel<State : Any, Msg : Any, Label: Any>(
     }
 
     val labels: Flow<Label> = callbackFlow {
-        observerLabel = observer { channel.trySend(it) }
-        awaitClose { observerState = null }
+        val observerLabel: Observer<Label> = observer { channel.trySend(it) }
+        observerLabels.add(observerLabel)
+        awaitClose { observerLabels.remove(observerLabel) }
     }
 
     protected fun dispatch(msg: Msg) {
@@ -31,7 +34,8 @@ abstract class BaseViewModel<State : Any, Msg : Any, Label: Any>(
     }
 
     protected fun publish(label: Label) {
-        observerLabel?.onNext(label)
+        //observerLabel?.onNext(label)
+        observerLabels.forEach { it.onNext(label) }
     }
 
     protected abstract fun State.reduce(msg: Msg): State
