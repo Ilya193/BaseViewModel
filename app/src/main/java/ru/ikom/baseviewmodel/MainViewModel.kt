@@ -1,16 +1,9 @@
 package ru.ikom.baseviewmodel
 
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.launch
-
 class MainViewModel :
     BaseViewModel<MainViewModel.State, MainViewModel.Msg, MainViewModel.Label>(initialState = State.initial()) {
 
     fun handleEvent(event: Event) {
-        publish(Label.Test())
         when (event) {
             is Event.OnClick -> handleEvent(event)
             is Event.OnViewCreated -> handleEvent(event)
@@ -19,24 +12,21 @@ class MainViewModel :
 
     private fun handleEvent(event: Event.OnClick) {
         val oldState = uiState
+
         val items = oldState.items
 
         if (items[event.position].isSelected) return
 
-        viewModelScope.launch {
-            val newItems = async(Dispatchers.IO) {
-                items.mapIndexed { index, item ->
-                    if (index == event.position) item.copy(isSelected = true)
-                    else item.copy(isSelected = false)
-                }
-            }.await()
-
-            dispatch(Msg.NewItems(
-                items = newItems,
-                position = event.position,
-                textTitle = newItems[event.position].text
-            ))
+        val newItems = items.mapIndexed { index, item ->
+            if (index == event.position) item.copy(isSelected = true)
+            else item.copy(isSelected = false)
         }
+
+        dispatch(Msg.NewItems(
+            items = newItems,
+            position = event.position,
+            textTitle = newItems[event.position].text
+        ))
     }
 
     private fun handleEvent(event: Event.OnViewCreated) {
@@ -51,19 +41,23 @@ class MainViewModel :
                     selectedItem = msg.position,
                     textTitle = msg.textTitle
                 )
+
+            is Msg.UpdateLock -> copy(isLock = msg.isLock)
         }
 
     data class State(
         val items: List<ItemUi>,
         val selectedItem: Int,
         val textTitle: String,
+        val isLock: Boolean,
     ) {
         companion object {
             fun initial(): State =
                 State(
                     items = generateItems(),
                     selectedItem = -1,
-                    textTitle = ""
+                    textTitle = "",
+                    isLock = false,
                 )
         }
     }
@@ -89,9 +83,11 @@ class MainViewModel :
             val position: Int,
             val textTitle: String,
         ) : Msg
+
+        class UpdateLock(val isLock: Boolean) : Msg
     }
 
     sealed interface Label {
-        class Test : Label
+        class Log(val i: Int) : Label
     }
 }

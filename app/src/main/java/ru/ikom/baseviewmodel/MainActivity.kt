@@ -9,7 +9,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.ikom.baseviewmodel.databinding.ActivityMainBinding
@@ -81,13 +80,9 @@ class MainActivity : AppCompatActivity(), MainView {
 
             launch {
                 viewModel.labels.collect {
-                    println("s149 first $it")
-                }
-            }
-
-            launch {
-                viewModel.labels.collect {
-                    println("s149 second $it")
+                    when (it) {
+                        is MainViewModel.Label.Log -> println("s149 first ${it.i}")
+                    }
                 }
             }
         }
