@@ -13,8 +13,6 @@ abstract class BaseViewModel<State : Any, Msg : Any, Label: Any>(
 
     protected var observerState: Observer<State>? = null
 
-    //protected var observerLabel: Observer<Label>? = null
-
     protected val observerLabels = mutableListOf<Observer<Label>>()
 
     val states: Flow<State> = callbackFlow {
@@ -34,7 +32,6 @@ abstract class BaseViewModel<State : Any, Msg : Any, Label: Any>(
     }
 
     protected fun publish(label: Label) {
-        //observerLabel?.onNext(label)
         observerLabels.forEach { it.onNext(label) }
     }
 

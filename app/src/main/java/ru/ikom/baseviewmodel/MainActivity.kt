@@ -6,6 +6,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
@@ -81,7 +82,8 @@ class MainActivity : AppCompatActivity(), MainView {
             launch {
                 viewModel.labels.collect {
                     when (it) {
-                        is MainViewModel.Label.Log -> println("s149 first ${it.i}")
+                        is MainViewModel.Label.Lock -> binding.lock.isVisible = true
+                        is MainViewModel.Label.Unlock -> binding.lock.isVisible = false
                     }
                 }
             }
@@ -93,5 +95,7 @@ class MainActivity : AppCompatActivity(), MainView {
         binding.items.itemAnimator = null
         binding.items.setHasFixedSize(true)
         binding.items.addItemDecoration(DividerItemDecoration(this, RecyclerView.VERTICAL))
+
+        binding.lock.setOnTouchListener { v, event -> true }
     }
 }

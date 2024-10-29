@@ -1,5 +1,9 @@
 package ru.ikom.baseviewmodel
 
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
 class MainViewModel :
     BaseViewModel<MainViewModel.State, MainViewModel.Msg, MainViewModel.Label>(initialState = State.initial()) {
 
@@ -16,6 +20,13 @@ class MainViewModel :
         val items = oldState.items
 
         if (items[event.position].isSelected) return
+
+        publish(Label.Lock())
+
+        viewModelScope.launch {
+            delay(1000)
+            publish(Label.Unlock())
+        }
 
         val newItems = items.mapIndexed { index, item ->
             if (index == event.position) item.copy(isSelected = true)
@@ -41,15 +52,12 @@ class MainViewModel :
                     selectedItem = msg.position,
                     textTitle = msg.textTitle
                 )
-
-            is Msg.UpdateLock -> copy(isLock = msg.isLock)
         }
 
     data class State(
         val items: List<ItemUi>,
         val selectedItem: Int,
         val textTitle: String,
-        val isLock: Boolean,
     ) {
         companion object {
             fun initial(): State =
@@ -57,7 +65,6 @@ class MainViewModel :
                     items = generateItems(),
                     selectedItem = -1,
                     textTitle = "",
-                    isLock = false,
                 )
         }
     }
@@ -70,24 +77,16 @@ class MainViewModel :
         class OnViewCreated : Event
     }
 
-    sealed interface Action {
-
-        class Render(
-            val new: MainView.Model
-        ) : Action
-    }
-
     sealed interface Msg {
         class NewItems(
             val items: List<ItemUi>,
             val position: Int,
             val textTitle: String,
         ) : Msg
-
-        class UpdateLock(val isLock: Boolean) : Msg
     }
 
     sealed interface Label {
-        class Log(val i: Int) : Label
+        class Lock : Label
+        class Unlock : Label
     }
 }
