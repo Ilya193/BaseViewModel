@@ -12,7 +12,7 @@ import kotlinx.serialization.json.Json
 
 class MainViewModel(
     private val savedState: SavedStateHandle,
-) : BaseViewModel<MainViewModel.State, MainViewModel.Msg>(initialState = State.initial()) {
+) : BaseViewModel<MainViewModel.State, MainViewModel.Msg, Any>(initialState = State.initial()) {
 
     init {
         val initState = savedState.get<Bundle>(State.UI_STATE_KEY)
@@ -23,22 +23,19 @@ class MainViewModel(
         }
 
         savedState.setSavedStateProvider(State.UI_STATE_KEY) {
+            println("s149 setSavedStateProvider CALL")
             bundleOf(State.STATE_KEY to Json.encodeToString(uiState))
         }
     }
 
-    val action = MutableSharedFlow<Action>()
-
     fun handleEvent(event: Event) {
-        viewModelScope.launch {
-            when (event) {
-                is Event.OnViewCreated -> handleEvent(event)
-                is Event.OnClick -> handleEvent(event)
-            }
+        when (event) {
+            is Event.OnViewCreated -> handleEvent(event)
+            is Event.OnClick -> handleEvent(event)
         }
     }
 
-    private suspend fun handleEvent(event: Event.OnClick) {
+    private fun handleEvent(event: Event.OnClick) {
         val oldState = uiState
         val items = oldState.items
 
@@ -56,16 +53,11 @@ class MainViewModel(
         ))
     }
 
-    private suspend fun handleEvent(event: Event.OnViewCreated) {
-        action.emit(Action.Render(uiState.stateToModel()))
+    private fun handleEvent(event: Event.OnViewCreated) {
+        observerState?.onNext(uiState)
     }
 
-    override suspend fun dispatch(msg: Msg) {
-        uiState = uiState.reduce(msg)
-        action.emit(Action.Render(uiState.stateToModel()))
-    }
-
-    override suspend fun State.reduce(msg: Msg): State =
+    override fun State.reduce(msg: Msg): State =
         when (msg) {
             is Msg.NewItems ->
                 copy(
@@ -84,6 +76,7 @@ class MainViewModel(
         companion object {
             const val UI_STATE_KEY = "UI_STATE_KEY"
             const val STATE_KEY = "STATE_KEY"
+
             fun initial(): State =
                 State(
                     items = generateItems(),
@@ -99,13 +92,6 @@ class MainViewModel(
         class OnClick(
             val position: Int
         ) : Event
-    }
-
-    sealed interface Action {
-
-        class Render(
-            val new: MainView.Model
-        ) : Action
     }
 
     sealed interface Msg {

@@ -81,10 +81,10 @@ class MainActivity : AppCompatActivity(), MainView {
 
             launch {
                 viewModel.labels.collect {
-                    when (it) {
+                    /*when (it) {
                         is MainViewModel.Label.Lock -> binding.lock.isVisible = true
                         is MainViewModel.Label.Unlock -> binding.lock.isVisible = false
-                    }
+                    }*/
                 }
             }
         }
