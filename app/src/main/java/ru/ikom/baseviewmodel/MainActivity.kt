@@ -6,9 +6,11 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.ikom.baseviewmodel.databinding.ActivityMainBinding
 
@@ -73,8 +75,17 @@ class MainActivity : AppCompatActivity(), MainView {
 
     private fun settingViewModel() {
         lifecycleScope.launch {
-            viewModel.action.collect {
-                receiveAction(it)
+            launch {
+                viewModel.states.map(stateToModel) bindTo ::render
+            }
+
+            launch {
+                viewModel.labels.collect {
+                    when (it) {
+                        is MainViewModel.Label.Lock -> binding.lock.isVisible = true
+                        is MainViewModel.Label.Unlock -> binding.lock.isVisible = false
+                    }
+                }
             }
         }
     }
@@ -84,11 +95,7 @@ class MainActivity : AppCompatActivity(), MainView {
         binding.items.itemAnimator = null
         binding.items.setHasFixedSize(true)
         binding.items.addItemDecoration(DividerItemDecoration(this, RecyclerView.VERTICAL))
-    }
 
-    private fun receiveAction(action: MainViewModel.Action) {
-        when (action) {
-            is MainViewModel.Action.Render -> render(action.new)
-        }
+        binding.lock.setOnTouchListener { v, event -> true }
     }
 }
