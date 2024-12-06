@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 
 abstract class BaseStoreWithNull<T: Any?>(initial: T?) {
-    open var state = initial
+    protected open var state = initial
 
     protected open var observers = mutableListOf<Observer<T>>()
 
