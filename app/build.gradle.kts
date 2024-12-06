@@ -54,4 +54,5 @@ dependencies {
     implementation(libs.androidx.fragment.ktx)
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
+    implementation("io.insert-koin:koin-android:3.5.6")
 }

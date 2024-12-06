@@ -4,15 +4,17 @@ import android.os.Bundle
 import androidx.core.os.bundleOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 class MainViewModel(
+    private val store: MainStore,
     private val savedState: SavedStateHandle,
-) : BaseViewModel<MainViewModel.State, MainViewModel.Msg, Any>(initialState = State.initial()) {
+) : BaseViewModel<MainViewModel.State, MainViewModel.Msg,
+        MainViewModel.Event, Any>(initialState = State.initial()) {
 
     init {
         savedState.get<Bundle>(State.UI_STATE_KEY)?.let {
@@ -23,9 +25,17 @@ class MainViewModel(
         savedState.setSavedStateProvider(State.UI_STATE_KEY) {
             bundleOf(State.STATE_KEY to Json.encodeToString(uiState))
         }
+
+        store.initSavedState(savedState)
+
+        viewModelScope.launch {
+            store.states.filterNotNull().collect {
+                dispatch(Msg.UpdateTitleInformation(information = it.information))
+            }
+        }
     }
 
-    fun handleEvent(event: Event) {
+    override fun handleEvent(event: Event) {
         when (event) {
             is Event.OnViewCreated -> handleEvent(event)
             is Event.OnClick -> handleEvent(event)
@@ -43,11 +53,18 @@ class MainViewModel(
             else item.copy(isSelected = false)
         }
 
+        val newTitle = newItems[event.position].text
+
         dispatch(Msg.NewItems(
             items = newItems,
             position = event.position,
-            textTitle = newItems[event.position].text
+            textTitle = newTitle
         ))
+
+        store.updateIfNotNull {
+            val newInformation = it.information + " " + newTitle
+            it.copy(information = newInformation)
+        }
     }
 
     private fun handleEvent(event: Event.OnViewCreated) {
@@ -62,6 +79,8 @@ class MainViewModel(
                     selectedItem = msg.position,
                     textTitle = msg.textTitle
                 )
+
+            is Msg.UpdateTitleInformation -> copy(information = msg.information)
         }
 
     @Serializable
@@ -69,6 +88,7 @@ class MainViewModel(
         val items: List<ItemUi>,
         val selectedItem: Int,
         val textTitle: String,
+        val information: String,
     ) {
         companion object {
             const val UI_STATE_KEY = "UI_STATE_KEY"
@@ -78,7 +98,8 @@ class MainViewModel(
                 State(
                     items = generateItems(),
                     selectedItem = -1,
-                    textTitle = ""
+                    textTitle = "",
+                    information = "",
                 )
         }
     }
@@ -97,5 +118,7 @@ class MainViewModel(
             val position: Int,
             val textTitle: String,
         ) : Msg
+
+        class UpdateTitleInformation(val information: String) : Msg
     }
 }

@@ -1,8 +1,10 @@
 package ru.ikom.baseviewmodel
 
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -27,13 +29,13 @@ class ItemsAdapter(
         }
 
         fun bindBackground(item: ItemUi) {
-            val background = GradientDrawable().apply {
-                shape = GradientDrawable.RECTANGLE
-                setColor(
-                    if (item.isSelected) 0xFF6E9827.toInt()
-                    else 0xFFFFFFFF.toInt()
-                )
+            val color = if (item.isSelected) {
+                0xFF6E9827.toInt()
             }
+            else {
+                ContextCompat.getColor(binding.root.context, R.color.background_item)
+            }
+            val background = ColorDrawable(color)
             binding.root.background = background
         }
     }

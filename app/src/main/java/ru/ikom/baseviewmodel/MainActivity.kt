@@ -12,13 +12,15 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import ru.ikom.baseviewmodel.databinding.ActivityMainBinding
 
 interface MainView : BaseView<MainView.Model> {
 
     data class Model(
         val items: List<ItemUi>,
-        val textTitle: String
+        val textTitle: String,
+        val information: String,
     )
 }
 
@@ -27,6 +29,7 @@ val stateToModel: MainViewModel.State.() -> MainView.Model =
         MainView.Model(
             items = items,
             textTitle = textTitle,
+            information = information,
         )
     }
 
@@ -36,7 +39,7 @@ class MainActivity : AppCompatActivity(), MainView {
         ActivityMainBinding.inflate(layoutInflater)
     }
 
-    private val viewModel: MainViewModel by viewModels()
+    private val viewModel: MainViewModel by viewModel()
 
     override var viewRenderer: ViewRenderer<MainView.Model>? = null
 
@@ -65,6 +68,11 @@ class MainActivity : AppCompatActivity(), MainView {
                 get = MainView.Model::textTitle,
                 set = binding.textview::setText
             )
+
+            diff(
+                get = MainView.Model::information,
+                set = binding.storeInfo::setText
+            )
         }
 
         settingViewModel()
@@ -75,18 +83,7 @@ class MainActivity : AppCompatActivity(), MainView {
 
     private fun settingViewModel() {
         lifecycleScope.launch {
-            launch {
-                viewModel.states.map(stateToModel) bindTo ::render
-            }
-
-            launch {
-                viewModel.labels.collect {
-                    /*when (it) {
-                        is MainViewModel.Label.Lock -> binding.lock.isVisible = true
-                        is MainViewModel.Label.Unlock -> binding.lock.isVisible = false
-                    }*/
-                }
-            }
+            viewModel.states.map(stateToModel) bindTo ::render
         }
     }
 

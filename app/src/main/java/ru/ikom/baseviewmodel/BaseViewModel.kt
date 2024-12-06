@@ -5,7 +5,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 
-abstract class BaseViewModel<State : Any, Msg : Any, Label: Any>(
+abstract class BaseViewModel<State : Any, Msg : Any, Event : Any, Label: Any>(
     private val initialState: State
 ) : ViewModel() {
 
@@ -25,6 +25,8 @@ abstract class BaseViewModel<State : Any, Msg : Any, Label: Any>(
         observerLabels.add(observerLabel)
         awaitClose { observerLabels.remove(observerLabel) }
     }
+
+    abstract fun handleEvent(event: Event)
 
     protected fun dispatch(msg: Msg) {
         uiState = uiState.reduce(msg)
