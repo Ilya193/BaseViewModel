@@ -15,15 +15,12 @@ class MainViewModel(
 ) : BaseViewModel<MainViewModel.State, MainViewModel.Msg, Any>(initialState = State.initial()) {
 
     init {
-        val initState = savedState.get<Bundle>(State.UI_STATE_KEY)
-
-        initState?.let {
-            val state = it.getString(State.STATE_KEY) ?: ""
-            if (state.isNotEmpty()) uiState = Json.decodeFromString(state)
+        savedState.get<Bundle>(State.UI_STATE_KEY)?.let {
+            val state = it.getString(State.STATE_KEY) ?: return@let
+            uiState = Json.decodeFromString(state)
         }
 
         savedState.setSavedStateProvider(State.UI_STATE_KEY) {
-            println("s149 setSavedStateProvider CALL")
             bundleOf(State.STATE_KEY to Json.encodeToString(uiState))
         }
     }
