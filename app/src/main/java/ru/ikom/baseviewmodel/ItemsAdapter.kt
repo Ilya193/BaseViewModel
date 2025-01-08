@@ -2,12 +2,14 @@ package ru.ikom.baseviewmodel
 
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
+import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import ru.ikom.baseviewmodel.databinding.ItemBinding
 
@@ -58,12 +60,12 @@ class ItemsAdapter(
     }
 }
 
-@Serializable
+@Parcelize
 data class ItemUi(
     val id: Int,
     val text: String,
     val isSelected: Boolean = false
-)
+): Parcelable
 
 class DiffItems : DiffUtil.ItemCallback<ItemUi>() {
     override fun areItemsTheSame(oldItem: ItemUi, newItem: ItemUi): Boolean {

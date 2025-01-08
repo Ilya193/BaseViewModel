@@ -1,11 +1,13 @@
 package ru.ikom.baseviewmodel
 
 import android.os.Bundle
+import android.os.Parcelable
 import androidx.core.os.bundleOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -17,13 +19,13 @@ class MainViewModel(
         MainViewModel.Event, Any>(initialState = State.initial()) {
 
     init {
-        savedState.get<Bundle>(State.UI_STATE_KEY)?.let {
-            val state = it.getString(State.STATE_KEY) ?: return@let
-            uiState = Json.decodeFromString(state)
+        savedState.get<State>(State.STATE_KEY)?.let {
+            uiState = it
         }
 
         savedState.setSavedStateProvider(State.UI_STATE_KEY) {
-            bundleOf(State.STATE_KEY to Json.encodeToString(uiState))
+            savedState[State.STATE_KEY] = uiState
+            Bundle()
         }
 
         store.initSavedState(savedState)
@@ -55,11 +57,13 @@ class MainViewModel(
 
         val newTitle = newItems[event.position].text
 
-        dispatch(Msg.NewItems(
-            items = newItems,
-            position = event.position,
-            textTitle = newTitle
-        ))
+        dispatch(
+            Msg.NewItems(
+                items = newItems,
+                position = event.position,
+                textTitle = newTitle
+            )
+        )
 
         store.updateIfNotNull {
             val newInformation = it.information + " " + newTitle
@@ -83,13 +87,13 @@ class MainViewModel(
             is Msg.UpdateTitleInformation -> copy(information = msg.information)
         }
 
-    @Serializable
+    @Parcelize
     data class State(
         val items: List<ItemUi>,
         val selectedItem: Int,
         val textTitle: String,
         val information: String,
-    ) {
+    ) : Parcelable {
         companion object {
             const val UI_STATE_KEY = "UI_STATE_KEY"
             const val STATE_KEY = "STATE_KEY"
